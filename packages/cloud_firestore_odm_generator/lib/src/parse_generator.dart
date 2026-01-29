@@ -8,8 +8,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
 
-abstract class ParserGenerator<GlobalData, Data, Annotation>
-    extends GeneratorForAnnotation<Annotation> {
+abstract class ParserGenerator<GlobalData, Data, Annotation> extends GeneratorForAnnotation<Annotation> {
   @override
   FutureOr<String> generate(
     // ignore: avoid_renaming_method_parameters
@@ -30,11 +29,10 @@ abstract class ParserGenerator<GlobalData, Data, Annotation>
     var hasGeneratedGlobalCode = false;
 
     for (final element
-        in library.topLevelElements.where(typeChecker.hasAnnotationOf)) {
+        in library.fragments.expand((f) => f.children).map((f) => f.element).where(typeChecker.hasAnnotationOf)) {
       if (!hasGeneratedGlobalCode) {
         hasGeneratedGlobalCode = true;
-        for (final generated
-            in generateForAll(globalData).map((e) => e.toString())) {
+        for (final generated in generateForAll(globalData).map((e) => e.toString())) {
           assert(generated.length == generated.trim().length);
           if (generatedCache.add(generated)) {
             generationBuffer.writeln(generated);
@@ -45,8 +43,7 @@ abstract class ParserGenerator<GlobalData, Data, Annotation>
       final data = await parseElement(buildStep, globalData, element);
       if (data == null) continue;
 
-      for (final generated
-          in generateForData(globalData, data).map((e) => e.toString())) {
+      for (final generated in generateForData(globalData, data).map((e) => e.toString())) {
         assert(generated.length == generated.trim().length);
 
         if (generatedCache.add(generated)) {

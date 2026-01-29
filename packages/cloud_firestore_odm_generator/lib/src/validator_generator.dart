@@ -15,7 +15,7 @@ class ValidatorGenerator extends Generator {
 
     for (final classElement in library.classes) {
       final validations = classElement.fields.expand<String>((field) sync* {
-        final validators = field.metadata.where(isValidatorAnnotation);
+        final validators = field.metadata.annotations.where(isValidatorAnnotation);
 
         for (final validator in validators) {
           yield "${validator.toSource().replaceFirst('@', 'const ')}.validate(instance.${field.name}, '${field.name}');";
@@ -42,7 +42,6 @@ bool isValidatorAnnotation(ElementAnnotation annotation) {
 
   return element.enclosingElement.allSupertypes.any((superType) {
     return superType.element.name == 'Validator' &&
-        superType.element.librarySource.uri.toString() ==
-            'package:cloud_firestore_odm/src/validator.dart';
+        superType.element.library.uri.toString() == 'package:cloud_firestore_odm/src/validator.dart';
   });
 }
